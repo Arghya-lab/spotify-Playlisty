@@ -5,6 +5,7 @@ function App() {
   const [token, setToken] = useState("");
   const [userId, setUserId] = useState("");
   const [input, setInput] = useState("");
+  const [playlistName, setPlaylistName] = useState("");
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("Initializing task.");
@@ -58,7 +59,6 @@ function App() {
 
     try {
       const songNames = JSON.parse(input);
-      const playlistName = "pop-hits";
 
       await delay(2000); // Wait for 2 seconds before the next iteration
 
@@ -67,7 +67,7 @@ function App() {
         data: { id: playlistId },
       } = await axios.post(
         `https://api.spotify.com/v1/users/${userId}/playlists`,
-        { name: playlistName, public: true },
+        { name: playlistName ? playlistName : "my songs", public: true },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -118,7 +118,9 @@ function App() {
       await searchPromises();
 
       // Add tracks to the playlist
-      const addTracksToPlaylist = async (tracksLinks) =>
+      const addTracksToPlaylist = async (tracksLinks) => {
+        console.log(tracksLinks);
+
         await axios.post(
           `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
           { uris: tracksLinks },
@@ -129,12 +131,20 @@ function App() {
             },
           }
         );
+      };
 
       let iteration = 1;
-      while (iteration * 80 < trackUris.length) {
-        await addTracksToPlaylist(
-          trackUris.slice((iteration - 1) * 80, iteration * 80)
+      const trackUriLmt = 50;
+
+      while ((iteration - 1) * trackUriLmt < trackUris.length) {
+        const tracksLinks = trackUris.slice(
+          (iteration - 1) * trackUriLmt,
+          trackUris.length < iteration * trackUriLmt
+            ? trackUris.length
+            : iteration * trackUriLmt
         );
+
+        await addTracksToPlaylist(tracksLinks);
         await delay(2000); // Wait for 2 seconds before the next iteration
         iteration++;
       }
@@ -152,9 +162,15 @@ function App() {
     <div className="App">
       <h1>Create Spotify Playlist</h1>
       {token ? (
-        <>
+        <section className="inp-pro-section">
           {!loading ? (
             <div className="inputRapper">
+              <input
+                type="text"
+                maxLength={16}
+                onChange={(e) => setPlaylistName(e.target.value)}
+                placeholder="Enter playlist name"
+              />
               <textarea
                 type="text"
                 rows="16"
@@ -179,11 +195,13 @@ function App() {
             </div>
           )}
           {/* {loaded ? <SpotifyPlaylist playlistArray={songs} /> : null} */}
-        </>
+        </section>
       ) : (
-        <button className="loginBtn" onClick={spotifyLogin}>
-          Login To Start
-        </button>
+        <div className="loginBtnRapper">
+          <button className="loginBtn" onClick={spotifyLogin}>
+            Login To Start
+          </button>
+        </div>
       )}
     </div>
   );

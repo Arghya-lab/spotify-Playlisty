@@ -15,8 +15,6 @@
 
 body {
   margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
   padding-top: 2rem;
   padding-left: 2rem;
   padding-right: 2rem;
@@ -47,6 +45,26 @@ h6 {
   text-align: center;
 }
 
+.inp-pro-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 3rem;
+}
+
+input {
+  width: calc(100% - 1rem);
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+input:focus {
+  outline: none;
+  border-color: #9be737;
+}
+
 textarea {
   width: calc(100% - 1rem);
   height: 200px;
@@ -56,6 +74,11 @@ textarea {
   resize: none;
   overflow-y: hidden;
   overflow-x: auto;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #ddd;
 }
 
 button {
@@ -105,10 +128,15 @@ button:focus-visible {
 
 .progressRapper {
   padding-top: 6rem;
+}
+
+.loginBtnRapper {
+  height: calc(100vh - 20rem);
+  min-height: 424px;
+  width: 100%;
   display: flex;
-  gap: 1.5rem;
+  justify-content: center;
   align-items: center;
-  justify-content: space-evenly;
 }
 
 @media (prefers-color-scheme: light) {
