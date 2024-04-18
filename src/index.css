@@ -116,6 +116,12 @@ button:focus-visible {
   justify-content: space-between;
 }
 
+.doneBtnRapper {
+  padding-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
 .inputRapper {
   width: calc(100% - 2rem);
   max-width: 1080px;
