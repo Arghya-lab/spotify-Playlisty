@@ -8,9 +8,9 @@ function Login() {
       config.clientId
     }&response_type=token&redirect_uri=${encodeURIComponent(
       config.redirectUri
-    )}&scope=${encodeURIComponent(scopes)}`;
+    )}&scope=${scopes}`;
 
-    window.location = url;
+    location.replace(url);
   };
 
   return (

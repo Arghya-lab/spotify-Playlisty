@@ -1,7 +1,7 @@
+import { StatesContextType } from "@/@types/statesContext";
 import { createContext, useContext, useState } from "react";
-import PropTypes from "prop-types";
 
-const StatesContext = createContext({
+const StatesContext = createContext<StatesContextType>({
   token: "",
   userId: "",
   songsNames: "",
@@ -17,9 +17,10 @@ const StatesContext = createContext({
   setMessage: () => {},
 });
 
-const useStates = () => useContext(StatesContext);
+// eslint-disable-next-line react-refresh/only-export-components
+export const useStates = () => useContext(StatesContext);
 
-const StatesProvider = ({ children }) => {
+export const StatesProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState("");
   const [userId, setUserId] = useState("");
   const [songsNames, setSongsNames] = useState("");
@@ -28,7 +29,13 @@ const StatesProvider = ({ children }) => {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("Initializing task.");
 
-  const setTokenAndUserId = ({ token, userId }) => {
+  const setTokenAndUserId = ({
+    token,
+    userId,
+  }: {
+    token: string;
+    userId: string;
+  }) => {
     setToken(token);
     setUserId(userId);
   };
@@ -54,10 +61,3 @@ const StatesProvider = ({ children }) => {
     </StatesContext.Provider>
   );
 };
-
-StatesProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export { useStates, StatesProvider };

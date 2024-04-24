@@ -1,9 +1,9 @@
 import axios from "axios";
 
-const searchSong = async (token, song) => {
+const searchSong = async (token: string, song: string) => {
   try {
     const encodedSong = encodeURIComponent(song);
-    
+
     const response = await axios.get(
       `https://api.spotify.com/v1/search?q=name:${encodedSong}&type=track`,
       {

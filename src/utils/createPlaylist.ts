@@ -1,12 +1,14 @@
 import axios from "axios";
+import { Dispatch, SetStateAction } from "react";
 
 const createPlaylist = async (
-  userId,
-  token,
-  setMessage,
-  playlistName = "my songs"
+  userId: string,
+  token: string,
+  setMessage: Dispatch<SetStateAction<string>>,
+  playlistName?: string
 ) => {
   try {
+    if (!playlistName) playlistName = "my songs";
     const { data } = await axios.post(
       `https://api.spotify.com/v1/users/${userId}/playlists`,
       { name: playlistName, public: true },
@@ -19,7 +21,7 @@ const createPlaylist = async (
     );
     return data;
   } catch (error) {
-    setMessage("Error generating playlist:", error);
+    setMessage(`Error generating playlist: ${error}`);
   }
 };
 

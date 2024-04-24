@@ -18,12 +18,15 @@ function App() {
             .substring(1)
             .split("&")
             .find((elem) => elem.startsWith("access_token"))
-            .split("=")[1];
+            ?.split("=")[1]; // Use optional chaining here
 
-          const userId = await getUserId(token);
-          setTokenAndUserId({ token, userId });
+          if (token) {
+            // Check if token is truthy
+            const userId = await getUserId(token);
+            setTokenAndUserId({ token, userId });
 
-          window.location.hash = "";
+            window.location.hash = "";
+          }
         } catch (error) {
           console.error("Error fetching data:", error);
         }

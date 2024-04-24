@@ -17,11 +17,11 @@ function Form() {
     setMessage,
   } = useStates();
 
-  const trackUris = []; // Array to store track URIs
+  const trackUris: string[] = []; // Array to store track URIs
 
   const generatePlaylist = async () => {
-    const songNames = JSON.parse(songsNames);
-    
+    const songNames = JSON.parse(songsNames) as string[];
+
     setIsTaskRunning(true);
     setMessage("Analyzing your data.");
     await delay(2000);
@@ -33,21 +33,19 @@ function Form() {
       playlistName
     );
     setMessage("Waiting for searching songs.");
-    await delay(1750);
+    await delay(2000);
 
     // Search songs and collect URIs
-    const searchPromises = async (startIdx, endIdx) => {
-      const promises = songNames
-        .slice(startIdx, endIdx)
-        .map(async (song, index) => {
-          const searchData = await searchSong(token, song);
+    const searchPromises = async () => {
+      const promises = songNames.map(async (song, index) => {
+        const searchData = await searchSong(token, song);
 
-          if (searchData?.trackUri) {
-            trackUris.push(searchData.trackUri);
-          }
+        if (searchData?.trackUri) {
+          trackUris.push(searchData.trackUri);
+        }
 
-          return { id: index, ...searchData };
-        });
+        return { id: index, ...searchData };
+      });
 
       for (const promise of promises) {
         const result = await promise;
@@ -57,7 +55,7 @@ function Form() {
             : `Error occur while processed song : ${result.name}`
         );
         setProgress(Math.floor((Number(result.id) * 95) / trackUris.length));
-        await delay(1750);
+        await delay(2000);
       }
     };
 
@@ -75,7 +73,7 @@ function Form() {
       );
 
       await addTracksToPlaylist(token, playlistData.id, tracksLinks);
-      await delay(1750);
+      await delay(2000);
       iteration++;
     }
 
@@ -92,9 +90,8 @@ function Form() {
         placeholder="Enter playlist name"
       />
       <textarea
-        type="text"
-        rows="16"
-        cols="36"
+        rows={16}
+        cols={36}
         onChange={(e) => setSongsNames(e.target.value)}
         placeholder="Enter song names as an array"
       />

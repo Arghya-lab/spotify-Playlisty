@@ -1,6 +1,10 @@
 import axios from "axios";
 
-const addTracksToPlaylist = async (token, playlistId, tracksLinks) => {
+const addTracksToPlaylist = async (
+  token: string,
+  playlistId: string,
+  tracksLinks: string[]
+) => {
   try {
     await axios.post(
       `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
