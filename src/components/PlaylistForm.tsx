@@ -3,8 +3,12 @@ import delay from "../utils/delay";
 import createPlaylist from "../utils/createPlaylist";
 import searchSong from "../utils/searchSong";
 import addTracksToPlaylist from "../utils/addTracksToPlaylist";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
 
-function Form() {
+function PlaylistForm() {
   const {
     token,
     userId,
@@ -82,27 +86,36 @@ function Form() {
   };
 
   return (
-    <div className="inputRapper">
-      <input
-        type="text"
-        maxLength={16}
-        onChange={(e) => setPlaylistName(e.target.value)}
-        placeholder="Enter playlist name"
-      />
-      <textarea
-        rows={16}
-        cols={36}
-        onChange={(e) => setSongsNames(e.target.value)}
-        placeholder="Enter song names as an array"
-      />
-      <div className="btnRapper">
-        <button className="clrBtn" onClick={() => setSongsNames("")}>
+    <div className="w-[calc(100%-2rem)] max-w-3xl py-16 pt-32 sm:pt-48 grid gap-6">
+      <div className="grid w-full items-center gap-1.5">
+        <Label htmlFor="playlistName">Playlist Name</Label>
+        <Input
+          type="text"
+          id="playlistName"
+          placeholder="my songs"
+          maxLength={16}
+          onChange={(e) => setPlaylistName(e.target.value)}
+        />
+      </div>
+      <div className="grid w-full gap-1.5">
+        <Label htmlFor="songs">Songs To Add</Label>
+        <Textarea
+          placeholder="Type your songs here."
+          id="songs"
+          rows={16}
+          cols={36}
+          onChange={(e) => setSongsNames(e.target.value)}
+        />
+      </div>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setSongsNames("")}>
           Clear
-        </button>
-        <button onClick={generatePlaylist}>Generate</button>
+        </Button>
+        <Button onClick={generatePlaylist}>Generate</Button>
       </div>
     </div>
   );
 }
 
-export default Form;
+export default PlaylistForm;

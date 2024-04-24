@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import Login from "./components/Login";
-import Progress from "./components/Progress";
+import ProgressInfo from "./components/ProgressInfo";
 import { useStates } from "./context/StatesContext";
-import Form from "./components/Form";
 import getUserId from "./utils/getUserId";
+import { TypographyH1 } from "./components/ui/Typography";
+import PlaylistForm from "./components/PlaylistForm";
 
 function App() {
   const { token, isTaskRunning, setTokenAndUserId } = useStates();
@@ -39,11 +40,13 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
-      <h1>Create Spotify Playlist</h1>
+    <div className="min-h-svh">
+      <TypographyH1 className="pt-16 text-center">
+        Create Spotify Playlist
+      </TypographyH1>
       {token ? (
-        <section className="inp-pro-section">
-          {!isTaskRunning ? <Form /> : <Progress />}
+        <section className="w-full flex justify-center">
+          {!isTaskRunning ? <PlaylistForm /> : <ProgressInfo />}
         </section>
       ) : (
         <Login />

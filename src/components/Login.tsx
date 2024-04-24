@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import config from "../conf";
 
 function Login() {
@@ -14,10 +15,10 @@ function Login() {
   };
 
   return (
-    <div className="loginBtnRapper">
-      <button className="loginBtn" onClick={spotifyLogin}>
-        Login To Start
-      </button>
+    <div className="h-[calc(100vh-10rem)] min-h-[424px] flex items-center justify-center">
+      <Button size="lg" onClick={spotifyLogin}>
+        Login To Continue
+      </Button>
     </div>
   );
 }
