@@ -42,7 +42,7 @@ function App() {
   return (
     <div className="min-h-svh">
       <TypographyH1 className="pt-16 text-center">
-        Create Spotify Playlist
+        Spotify Playlisty
       </TypographyH1>
       {token ? (
         <section className="w-full flex justify-center">

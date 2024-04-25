@@ -4,20 +4,11 @@ import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 
 function ProgressInfo() {
-  const {
-    progress,
-    message,
-    setIsTaskRunning,
-    setProgress,
-    setPlaylistName,
-    setSongsNames,
-    setMessage,
-  } = useStates();
+  const { progress, message, setIsTaskRunning, setProgress, setMessage } =
+    useStates();
 
   const handleBtnClick = () => {
     setProgress(0);
-    setPlaylistName("");
-    setSongsNames("");
     setMessage("");
     setIsTaskRunning(false);
   };

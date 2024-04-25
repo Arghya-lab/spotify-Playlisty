@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Dispatch, SetStateAction } from "react";
+import { SpotifyPlaylistType } from "@/@types/spotify";
 
 const createPlaylist = async (
   userId: string,
@@ -9,7 +10,7 @@ const createPlaylist = async (
 ) => {
   try {
     if (!playlistName) playlistName = "my songs";
-    const { data } = await axios.post(
+    const { data }: { data: SpotifyPlaylistType } = await axios.post(
       `https://api.spotify.com/v1/users/${userId}/playlists`,
       { name: playlistName, public: true },
       {
