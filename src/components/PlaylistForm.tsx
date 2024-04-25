@@ -34,11 +34,13 @@ function PlaylistForm() {
   const {
     token,
     userId,
+    songImgUrls,
     setIsTaskRunning,
     setProgress,
     setMessage,
     setPlaylistData,
     setErrorSongs,
+    setSongImgUrls,
   } = useStates();
   const [formType, setFormType] = useState<string>(FormTypeEnum.CREATEPLAYLIST);
   const formSchema = playlistFormSchema;
@@ -94,9 +96,11 @@ function PlaylistForm() {
       trackUris = await searchSongs(
         songNames,
         token,
+        songImgUrls,
         setMessage,
         setProgress,
-        setErrorSongs
+        setErrorSongs,
+        setSongImgUrls
       );
 
       let iteration = 1;
@@ -129,6 +133,7 @@ function PlaylistForm() {
       setMessage("Error occur to fetch playlist data.");
       setProgress(100);
     }
+    console.log(songImgUrls);
   };
 
   return (

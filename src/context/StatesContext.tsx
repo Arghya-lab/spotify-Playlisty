@@ -1,6 +1,6 @@
 import { SpotifyPlaylistType } from "@/@types/spotify";
-import { StatesContextType } from "@/@types/statesContext";
-import { createContext, useContext, useState } from "react";
+import { AuthDataType, StatesContextType } from "@/@types/statesContext";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const StatesContext = createContext<StatesContextType>({
   token: "",
@@ -10,6 +10,7 @@ const StatesContext = createContext<StatesContextType>({
   message: "Initializing task.",
   playlistData: null,
   errorSongs: [],
+  songImgUrls: [],
   setTokenAndUserId: () => {},
   setIsTaskRunning: () => {},
   setProgress: () => {},
@@ -17,6 +18,7 @@ const StatesContext = createContext<StatesContextType>({
   setPlaylistData: () => {},
   setErrorSongs: () => {},
   resetProcess: () => {},
+  setSongImgUrls: () => {},
 });
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -32,6 +34,28 @@ export const StatesProvider = ({ children }: { children: React.ReactNode }) => {
     null
   );
   const [errorSongs, setErrorSongs] = useState<string[]>([]);
+  const [songImgUrls, setSongImgUrls] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+    null,
+  ]);
+
+  useEffect(() => {
+    const storedAuthDataString = localStorage.getItem("spotifyAuthData");
+    const authData: AuthDataType = storedAuthDataString
+      ? JSON.parse(storedAuthDataString)
+      : { token: "", userId: "", expiresIn: 0 };
+
+    if (
+      new Date().getTime() < authData.expiresIn &&
+      authData.token &&
+      authData.userId
+    ) {
+      setToken(authData.token);
+      setUserId(authData.userId);
+    }
+  }, []);
 
   const setTokenAndUserId = ({
     token,
@@ -40,6 +64,15 @@ export const StatesProvider = ({ children }: { children: React.ReactNode }) => {
     token: string;
     userId: string;
   }) => {
+    localStorage.setItem(
+      "spotifyAuthData",
+      JSON.stringify({
+        token,
+        userId,
+        expiresIn: new Date().getTime() + 1000 * 60 * 60,
+      })
+    );
+
     setToken(token);
     setUserId(userId);
   };
@@ -61,12 +94,14 @@ export const StatesProvider = ({ children }: { children: React.ReactNode }) => {
         message,
         playlistData,
         errorSongs,
+        songImgUrls,
         setTokenAndUserId,
         setIsTaskRunning,
         setProgress,
         setMessage,
         setPlaylistData,
         setErrorSongs,
+        setSongImgUrls,
         resetProcess,
       }}>
       {children}

@@ -1,6 +1,12 @@
 import { Dispatch, SetStateAction } from "react";
 import { SpotifyPlaylistType } from "./spotify";
 
+export interface AuthDataType {
+  token: string;
+  userId: string;
+  expiresIn: number;
+}
+
 export interface StatesContextType {
   token: string;
   userId: string;
@@ -9,6 +15,7 @@ export interface StatesContextType {
   message: string;
   playlistData: SpotifyPlaylistType | null;
   errorSongs: string[];
+  songImgUrls: (string | null)[];
   setTokenAndUserId: ({
     token,
     userId,
@@ -21,5 +28,6 @@ export interface StatesContextType {
   setMessage: Dispatch<SetStateAction<string>>;
   setPlaylistData: Dispatch<SetStateAction<SpotifyPlaylistType | null>>;
   setErrorSongs: Dispatch<SetStateAction<string[]>>;
+  setSongImgUrls: Dispatch<SetStateAction<(string | null)[]>>;
   resetProcess: () => void;
 }
