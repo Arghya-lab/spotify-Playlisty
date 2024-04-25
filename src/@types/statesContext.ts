@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
+import { SpotifyPlaylistType } from "./spotify";
 
 export interface StatesContextType {
   token: string;
@@ -6,6 +7,8 @@ export interface StatesContextType {
   isTaskRunning: boolean;
   progress: number;
   message: string;
+  playlistData: SpotifyPlaylistType | null;
+  errorSongs: string[];
   setTokenAndUserId: ({
     token,
     userId,
@@ -16,4 +19,7 @@ export interface StatesContextType {
   setIsTaskRunning: Dispatch<SetStateAction<boolean>>;
   setProgress: Dispatch<SetStateAction<number>>;
   setMessage: Dispatch<SetStateAction<string>>;
+  setPlaylistData: Dispatch<SetStateAction<SpotifyPlaylistType | null>>;
+  setErrorSongs: Dispatch<SetStateAction<string[]>>;
+  resetProcess: () => void;
 }

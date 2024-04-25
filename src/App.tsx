@@ -41,11 +41,11 @@ function App() {
 
   return (
     <div className="min-h-svh">
-      <TypographyH1 className="pt-16 text-center">
+      <TypographyH1 className="pb-12 pt-6 pl-6 md:pt-10 md:pl-10 lg:pl-[5%]">
         Spotify Playlisty
       </TypographyH1>
       {token ? (
-        <section className="w-full flex justify-center">
+        <section className="w-full flex flex-col items-center">
           {!isTaskRunning ? <PlaylistForm /> : <ProgressInfo />}
         </section>
       ) : (

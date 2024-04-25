@@ -101,21 +101,23 @@ export function TypographyBlockquote({
   );
 }
 
-// export function TypographyList({
-//   children,
-//   className,
-// }: {
-//   children: React.ReactNode;
-//   className?: string;
-// }) {
-//   return (
-//     <ul className={cn("my-6 ml-6 list-disc [&>li]:mt-2", className)}>
-//       <li>1st level of puns: 5 gold coins</li>
-//       <li>2nd level of jokes: 10 gold coins</li>
-//       <li>3rd level of one-liners : 20 gold coins</li>
-//     </ul>
-//   );
-// }
+export function TypographyList({
+  items,
+  className,
+}: {
+  items: string[];
+  className?: string;
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <ul className={cn("my-4 ml-6 list-disc [&>li]:mt-2", className)}>
+      {items.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  );
+}
 
 export function TypographyInlineCode({
   children,

@@ -7,7 +7,8 @@ export default async function searchSongs(
   songNames: string[],
   token: string,
   setMessage: Dispatch<SetStateAction<string>>,
-  setProgress: Dispatch<SetStateAction<number>>
+  setProgress: Dispatch<SetStateAction<number>>,
+  setErrorSongs: Dispatch<SetStateAction<string[]>>
 ) {
   const trackUris: string[] = [];
 
@@ -23,12 +24,15 @@ export default async function searchSongs(
 
   for (const promise of promises) {
     const result = await promise;
+    if (result?.error) {
+      setErrorSongs((prev) => [...prev, result.name]);
+    }
     setMessage(
       result?.trackUri
         ? `Processed song : ${result.name}`
         : `Error occur while processed song : ${result.name}`
     );
-    setProgress(Math.floor((Number(result.id) * 95) / trackUris.length));
+    setProgress(Math.floor((Number(result.id + 1) * 95) / trackUris.length));
     await delay(2000);
   }
   return trackUris;

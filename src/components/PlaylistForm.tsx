@@ -31,8 +31,15 @@ import getSpotifyPlaylistId from "@/utils/getSpotifyPlaylistId";
 import searchSongs from "@/utils/searchSongs";
 
 function PlaylistForm() {
-  const { token, userId, setIsTaskRunning, setProgress, setMessage } =
-    useStates();
+  const {
+    token,
+    userId,
+    setIsTaskRunning,
+    setProgress,
+    setMessage,
+    setPlaylistData,
+    setErrorSongs,
+  } = useStates();
   const [formType, setFormType] = useState<string>(FormTypeEnum.CREATEPLAYLIST);
   const formSchema = playlistFormSchema;
 
@@ -50,6 +57,7 @@ function PlaylistForm() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     let trackUris: string[] = []; // Array to store track URIs
 
+    setPlaylistData(null);
     setIsTaskRunning(true);
     setMessage("Analyzing your data.");
     await delay(2000);
@@ -61,7 +69,6 @@ function PlaylistForm() {
     let playlistData: SpotifyPlaylistType | undefined;
 
     if (values.formType === FormTypeEnum.CREATEPLAYLIST) {
-      console.log("Playlist creating", values);
       playlistData = await createPlaylist(
         userId,
         token,
@@ -73,21 +80,24 @@ function PlaylistForm() {
       values.formType === FormTypeEnum.ADDTOEXISTING &&
       values?.playlistLink
     ) {
-      console.log("Playlist editing", values);
       const playlistId = getSpotifyPlaylistId(values.playlistLink);
       if (playlistId) {
         playlistData = await getPlaylist(playlistId, token, setMessage);
       }
     }
-    console.log("songNames", songNames);
-    console.log("playlistData", playlistData);
 
     if (playlistData) {
+      setPlaylistData(playlistData);
       setMessage("Waiting for searching songs.");
       await delay(2000);
 
-      trackUris = await searchSongs(songNames, token, setMessage, setProgress);
-      console.log("trackUris", trackUris);
+      trackUris = await searchSongs(
+        songNames,
+        token,
+        setMessage,
+        setProgress,
+        setErrorSongs
+      );
 
       let iteration = 1;
       const trackUriLmt = 50;
@@ -113,6 +123,7 @@ function PlaylistForm() {
       ) {
         setMessage(`Songs added to ${playlistData.name} Playlist.`);
       }
+
       setProgress(100);
     } else {
       setMessage("Error occur to fetch playlist data.");
