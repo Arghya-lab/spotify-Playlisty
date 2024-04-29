@@ -1,9 +1,15 @@
 import { Button } from "@/components/ui/button";
-import config from "../conf";
+import config from "../../conf";
 
 function Login() {
   const spotifyLogin = () => {
-    const scopes = ["playlist-modify-public"];
+    const scopes = [
+      "user-read-private",
+      "user-read-email",
+      "playlist-modify-public",
+      "playlist-modify-private",
+      "playlist-read-collaborative",
+    ];
 
     const url = `https://accounts.spotify.com/authorize?client_id=${
       config.clientId

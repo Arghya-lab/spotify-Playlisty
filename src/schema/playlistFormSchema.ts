@@ -1,7 +1,7 @@
 import { z } from "zod";
 import validateJsonSongsFormat from "@/validations/validateJsonSongsFormat";
 import validateLinesSongsFormat from "@/validations/validateLinesSongsFormat";
-import { FormTypeEnum } from "@/@types/form";
+import { FormTypeEnum } from "@/@types/statesContext";
 
 const playlistFormSchema = z
   .object({

@@ -174,6 +174,17 @@ export function TypographySmall({
     </small>
   );
 }
+export function TypographySpan({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <span className={cn("text-sm leading-none", className)}>{children}</span>
+  );
+}
 
 export function TypographyMuted({
   children,

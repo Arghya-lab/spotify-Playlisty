@@ -3,15 +3,23 @@ import { Dispatch, SetStateAction } from "react";
 import delay from "./delay";
 import { SpotifySearchTracksResType } from "@/@types/spotify";
 
-export default async function searchSongs(
-  songNames: string[],
-  token: string,
-  songUrls: (string | null)[],
-  setMessage: Dispatch<SetStateAction<string>>,
-  setProgress: Dispatch<SetStateAction<number>>,
-  setErrorSongs: Dispatch<SetStateAction<string[]>>,
-  setSongUrls: Dispatch<React.SetStateAction<(string | null)[]>>
-) {
+export default async function searchSongs({
+  songNames,
+  token,
+  setMessage,
+  setProgress,
+  setErrorSongs,
+  setSongImgUrls,
+}: {
+  songNames: string[];
+  token?: string;
+  setMessage: Dispatch<SetStateAction<string>>;
+  setProgress: Dispatch<SetStateAction<number>>;
+  setErrorSongs: Dispatch<SetStateAction<string[]>>;
+  setSongImgUrls: Dispatch<React.SetStateAction<(string | null)[]>>;
+}) {
+  if (!token) return;
+
   const trackUris: string[] = [];
   let currentProcessingSongIdx = 0;
 
@@ -33,14 +41,14 @@ export default async function searchSongs(
       setErrorSongs((prev) => [...prev, result.name]);
     }
     if (result.ImgUrl && currentProcessingSongIdx <= 4) {
-      setSongUrls((prev) => [...prev, result.ImgUrl]);
+      setSongImgUrls((prev) => [...prev, result.ImgUrl || null]);
     }
     setMessage(
       result?.trackUri
         ? `Processed song : ${result.name}`
         : `Error occur while processed song : ${result.name}`
     );
-    setProgress(Math.floor((currentProcessingSongIdx * 95) / trackUris.length));
+    setProgress(Math.floor((currentProcessingSongIdx * 95) / songNames.length));
     await delay(2000);
   }
   return trackUris;
@@ -61,7 +69,9 @@ export const searchSong = async (token: string, song: string) => {
     );
 
     const trackUri = data.tracks.items[0].uri;
-    const ImgUrl = data.tracks.items[0].album.images[1]?.url;
+    const ImgUrl = data.tracks.items[0].album.images
+      ? data.tracks.items[0].album.images[0]?.url
+      : null;
     return { name: song, trackUri, ImgUrl };
   } catch (error) {
     console.error(`Error searching song: ${song}`, error);

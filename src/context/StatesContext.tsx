@@ -1,18 +1,35 @@
-import { SpotifyPlaylistType } from "@/@types/spotify";
-import { AuthDataType, StatesContextType } from "@/@types/statesContext";
 import { createContext, useContext, useEffect, useState } from "react";
+import {
+  SpotifyPlaylistType,
+  UserType,
+  UserPlaylistsType,
+} from "@/@types/spotify";
+import {
+  AuthDataType,
+  FormTypeEnum,
+  PageEnum,
+  StatesContextType,
+} from "@/@types/statesContext";
+import fetchUserData from "@/utils/getUserData";
 
 const StatesContext = createContext<StatesContextType>({
+  currentPage: PageEnum.LOGINPAGE,
+  user: null,
   token: "",
-  userId: "",
+  userPlaylistsData: null,
   isTaskRunning: false,
+  playlistFormType: FormTypeEnum.CREATEPLAYLIST,
+  playlistFormInitialUrl: "",
   progress: 0,
   message: "Initializing task.",
   playlistData: null,
   errorSongs: [],
   songImgUrls: [],
-  setTokenAndUserId: () => {},
+  setCurrentPage: () => {},
+  setUserPlaylistsData: () => {},
   setIsTaskRunning: () => {},
+  setPlaylistFormType: () => {},
+  setPlaylistFormInitialUrl: () => {},
   setProgress: () => {},
   setMessage: () => {},
   setPlaylistData: () => {},
@@ -25,9 +42,16 @@ const StatesContext = createContext<StatesContextType>({
 export const useStates = () => useContext(StatesContext);
 
 export const StatesProvider = ({ children }: { children: React.ReactNode }) => {
+  const [currentPage, setCurrentPage] = useState(PageEnum.LOGINPAGE);
+  const [user, setUser] = useState<UserType | null>(null);
   const [token, setToken] = useState("");
-  const [userId, setUserId] = useState("");
+  const [userPlaylistsData, setUserPlaylistsData] =
+    useState<UserPlaylistsType | null>(null);
   const [isTaskRunning, setIsTaskRunning] = useState(false);
+  const [playlistFormType, setPlaylistFormType] = useState<string>(
+    FormTypeEnum.CREATEPLAYLIST
+  );
+  const [playlistFormInitialUrl, setPlaylistFormInitialUrl] = useState("");
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("Initializing task.");
   const [playlistData, setPlaylistData] = useState<SpotifyPlaylistType | null>(
@@ -41,62 +65,76 @@ export const StatesProvider = ({ children }: { children: React.ReactNode }) => {
     null,
   ]);
 
-  useEffect(() => {
-    const storedAuthDataString = localStorage.getItem("spotifyAuthData");
-    const authData: AuthDataType = storedAuthDataString
-      ? JSON.parse(storedAuthDataString)
-      : { token: "", userId: "", expiresIn: 0 };
-
-    if (
-      new Date().getTime() < authData.expiresIn &&
-      authData.token &&
-      authData.userId
-    ) {
-      setToken(authData.token);
-      setUserId(authData.userId);
-    }
-  }, []);
-
-  const setTokenAndUserId = ({
-    token,
-    userId,
-  }: {
-    token: string;
-    userId: string;
-  }) => {
+  const saveUserData = (user: UserType, token: string) => {
     localStorage.setItem(
-      "spotifyAuthData",
+      "spotifyUserData",
       JSON.stringify({
+        user,
         token,
-        userId,
         expiresIn: new Date().getTime() + 1000 * 60 * 60,
       })
     );
 
+    setUser(user);
     setToken(token);
-    setUserId(userId);
+    setCurrentPage(PageEnum.USERPAGE);
   };
+
+  useEffect(() => {
+    (async () => {
+      const storedAuthDataString = localStorage.getItem("spotifyUserData");
+      const authData: AuthDataType = storedAuthDataString
+        ? JSON.parse(storedAuthDataString)
+        : { token: "", user: null, expiresIn: 0 };
+
+      if (
+        new Date().getTime() < authData.expiresIn &&
+        authData.token &&
+        authData.user
+      ) {
+        setToken(authData.token);
+        setUser(authData.user);
+        setCurrentPage(PageEnum.USERPAGE);
+      } else {
+        const userData = await fetchUserData();
+        if (userData?.token && userData.user) {
+          saveUserData(userData.user, userData.token);
+        }
+      }
+    })();
+  }, []);
+
   const resetProcess = () => {
     setIsTaskRunning(false);
     setProgress(0);
     setMessage("Initializing task.");
     setPlaylistData(null);
+    setSongImgUrls([]);
+    setPlaylistFormInitialUrl("");
+    setPlaylistFormType(FormTypeEnum.CREATEPLAYLIST);
     setErrorSongs([]);
   };
 
   return (
     <StatesContext.Provider
       value={{
+        currentPage,
+        user,
         token,
-        userId,
+        userPlaylistsData,
         isTaskRunning,
+        playlistFormType,
+        playlistFormInitialUrl,
         progress,
         message,
         playlistData,
         errorSongs,
         songImgUrls,
-        setTokenAndUserId,
+        setCurrentPage,
+        setUserPlaylistsData,
         setIsTaskRunning,
+        setPlaylistFormType,
+        setPlaylistFormInitialUrl,
         setProgress,
         setMessage,
         setPlaylistData,

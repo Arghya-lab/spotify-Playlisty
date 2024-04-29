@@ -13,8 +13,8 @@ function PlaylistBarcode() {
           <TypographyLarge className="pb-6">
             {playlistData?.owner.display_name}
           </TypographyLarge>
-          {playlistData?.images[0]?.url ? (
-            <img className="h-64" src={playlistData?.images[0].url} />
+          {playlistData.images && playlistData.images[0]?.url ? (
+            <img className="h-64" src={playlistData.images[0].url} />
           ) : songImgUrls.length === 0 ? (
             <img className="h-64" src="/default-playlist-cover.png" />
           ) : (

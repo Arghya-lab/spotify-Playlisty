@@ -2,12 +2,19 @@ import axios from "axios";
 import { Dispatch, SetStateAction } from "react";
 import { SpotifyPlaylistType } from "@/@types/spotify";
 
-const createPlaylist = async (
-  userId: string,
-  token: string,
-  setMessage: Dispatch<SetStateAction<string>>,
-  playlistName?: string
-) => {
+const createPlaylist = async ({
+  userId,
+  token,
+  setMessage,
+  playlistName,
+}: {
+  userId?: string;
+  token?: string;
+  setMessage: Dispatch<SetStateAction<string>>;
+  playlistName?: string;
+}) => {
+  if (!userId || !token) return;
+
   try {
     if (!playlistName) playlistName = "my songs";
     const { data }: { data: SpotifyPlaylistType } = await axios.post(

@@ -1,12 +1,11 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useStates } from "../context/StatesContext";
-import delay from "../utils/delay";
-import createPlaylist from "../utils/createPlaylist";
-import addTracksToPlaylist from "../utils/addTracksToPlaylist";
-import { Input } from "./ui/input";
+import { useStates } from "../../context/StatesContext";
+import delay from "../../utils/delay";
+import createPlaylist from "../../utils/createPlaylist";
+import addTracksToPlaylist from "../../utils/addTracksToPlaylist";
+import { Input } from "../ui/input";
 import {
   Form,
   FormControl,
@@ -16,41 +15,72 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
-import { TypographySmall } from "./ui/Typography";
-import { FormTypeEnum } from "@/@types/form";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
-import { Switch } from "./ui/switch";
-import playlistFormSchema from "@/schema/playlistFormSchema";
+import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
+import { TypographySmall } from "../ui/Typography";
+import { FormTypeEnum } from "@/@types/statesContext";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
+import { Switch } from "../ui/switch";
 import convertJsonStrToArr from "@/utils/convertJsonStrToArr";
 import convertLinesToArr from "@/utils/convertLinesToArr";
 import { SpotifyPlaylistType } from "@/@types/spotify";
 import getPlaylist from "@/utils/getPlaylist";
 import getSpotifyPlaylistId from "@/utils/getSpotifyPlaylistId";
 import searchSongs from "@/utils/searchSongs";
+import playlistFormSchema from "@/schema/playlistFormSchema";
+import axios from "axios";
 
 function PlaylistForm() {
   const {
     token,
-    userId,
-    songImgUrls,
+    user,
+    playlistFormType,
+    playlistFormInitialUrl,
     setIsTaskRunning,
+    setPlaylistFormType,
     setProgress,
     setMessage,
     setPlaylistData,
     setErrorSongs,
     setSongImgUrls,
   } = useStates();
-  const [formType, setFormType] = useState<string>(FormTypeEnum.CREATEPLAYLIST);
-  const formSchema = playlistFormSchema;
+
+  const formSchema = playlistFormSchema.refine(
+    async (data) => {
+      if (data.formType === FormTypeEnum.ADDTOEXISTING) {
+        const playlistId = getSpotifyPlaylistId(data?.playlistLink);
+        if (playlistId && user) {
+          try {
+            const { data }: { data: SpotifyPlaylistType } = await axios.get(
+              `https://api.spotify.com/v1/playlists/${playlistId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+            return data.collaborative || data.owner.id === user.id;
+          } catch {
+            return false;
+          }
+        }
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "You aren't authorized to modify this playlist.",
+      path: ["playlistLink"],
+    }
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      formType: FormTypeEnum.CREATEPLAYLIST,
+      formType: playlistFormType,
       playlistName: "",
-      playlistLink: "",
+      playlistLink: playlistFormInitialUrl,
       isJsonFormat: false,
       songs: "",
     },
@@ -71,12 +101,12 @@ function PlaylistForm() {
     let playlistData: SpotifyPlaylistType | undefined;
 
     if (values.formType === FormTypeEnum.CREATEPLAYLIST) {
-      playlistData = await createPlaylist(
-        userId,
+      playlistData = await createPlaylist({
+        userId: user?.id,
         token,
         setMessage,
-        values.playlistName
-      );
+        playlistName: values.playlistName,
+      });
     }
     if (
       values.formType === FormTypeEnum.ADDTOEXISTING &&
@@ -84,7 +114,7 @@ function PlaylistForm() {
     ) {
       const playlistId = getSpotifyPlaylistId(values.playlistLink);
       if (playlistId) {
-        playlistData = await getPlaylist(playlistId, token, setMessage);
+        playlistData = await getPlaylist({ playlistId, token, setMessage });
       }
     }
 
@@ -93,15 +123,17 @@ function PlaylistForm() {
       setMessage("Waiting for searching songs.");
       await delay(2000);
 
-      trackUris = await searchSongs(
-        songNames,
-        token,
-        songImgUrls,
-        setMessage,
-        setProgress,
-        setErrorSongs,
-        setSongImgUrls
-      );
+      trackUris =
+        (await searchSongs({
+          songNames,
+          token,
+          setMessage,
+          setProgress,
+          setErrorSongs,
+          setSongImgUrls,
+        })) || [];
+
+      setMessage("Putting songs to playlist.");
 
       let iteration = 1;
       const trackUriLmt = 50;
@@ -114,10 +146,21 @@ function PlaylistForm() {
             : iteration * trackUriLmt
         );
 
-        await addTracksToPlaylist(token, playlistData.id, tracksLinks);
         await delay(2000);
+        await addTracksToPlaylist({
+          token,
+          playlistId: playlistData.id,
+          tracksLinks,
+        });
+
+        setProgress(
+          Math.floor(
+            (iteration * 5) / Math.ceil(trackUriLmt / trackUris.length) + 95
+          )
+        );
         iteration++;
       }
+
       if (values.formType === FormTypeEnum.CREATEPLAYLIST) {
         setMessage(`New Spotify Playlist ${playlistData.name} created!`);
       }
@@ -133,14 +176,13 @@ function PlaylistForm() {
       setMessage("Error occur to fetch playlist data.");
       setProgress(100);
     }
-    console.log(songImgUrls);
   };
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-[calc(100%-2rem)] max-w-3xl py-16 pt-32 sm:pt-40 space-y-8">
+        className="w-[calc(100%-2rem)] max-w-3xl py-16 pt-16 sm:pt-20 space-y-8 m-auto">
         {/* Create new or add to Existing playlist section */}
         <ToggleGroup
           type="single"
@@ -150,7 +192,7 @@ function PlaylistForm() {
           onValueChange={(value) => {
             if (value) {
               form.setValue("formType", value);
-              setFormType(value);
+              setPlaylistFormType(value);
             }
           }}>
           <ToggleGroupItem
@@ -165,7 +207,7 @@ function PlaylistForm() {
           </ToggleGroupItem>
         </ToggleGroup>
 
-        {formType === FormTypeEnum.CREATEPLAYLIST && (
+        {playlistFormType === FormTypeEnum.CREATEPLAYLIST && (
           <FormField
             control={form.control}
             name="playlistName"
@@ -185,7 +227,7 @@ function PlaylistForm() {
             )}
           />
         )}
-        {formType === FormTypeEnum.ADDTOEXISTING && (
+        {playlistFormType === FormTypeEnum.ADDTOEXISTING && (
           <FormField
             control={form.control}
             name="playlistLink"

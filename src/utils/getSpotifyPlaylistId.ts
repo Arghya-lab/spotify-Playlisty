@@ -1,4 +1,5 @@
-export default function getSpotifyPlaylistId(playlistUrl: string) {
+export default function getSpotifyPlaylistId(playlistUrl?: string) {
+  if (!playlistUrl) return null;
   // Regular expression to match and extract Spotify playlist IDs
   const spotifyPlaylistRegex =
     /^https:\/\/open\.spotify\.com\/playlist\/([a-zA-Z0-9]{22})(\?si=[a-zA-Z0-9]+)?$/;
